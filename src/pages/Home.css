@@ -1,0 +1,306 @@
+.hero {
+  position: relative;
+  height: 60vh;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  background-image: url('https://images.unsplash.com/photo-1459749411175-04bf5292ceea?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');
+  background-size: cover;
+  background-position: center;
+  margin-top: -1px;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(10, 10, 11, 0.4), rgba(10, 10, 11, 1));
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.hero-title {
+  font-size: clamp(3rem, 5vw, 5rem);
+  color: white;
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+  margin-bottom: 3rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.hero-search-form {
+  width: 100%;
+  max-width: 800px;
+}
+
+.hero-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: var(--radius-full);
+  padding: 0.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.hero-search-icon {
+  position: absolute;
+  left: 1.5rem;
+  color: #6b7280;
+}
+
+.hero-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 1rem 1rem 1rem 3.5rem;
+  font-size: 1.1rem;
+  color: #111827;
+  outline: none;
+}
+
+.hero-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.hero-search-btn {
+  padding: 1rem 2rem;
+  border-radius: var(--radius-full);
+  font-size: 1.1rem;
+}
+
+/* Sections Common */
+.section-title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: white;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+
+.section-header .section-title {
+  margin-bottom: 0;
+}
+
+/* Categories Section */
+.categories-section {
+  padding-top: 5rem;
+  padding-bottom: 3rem;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.category-card {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.category-card:hover {
+  background-color: var(--accent-primary);
+  transform: translateY(-5px);
+  border-color: var(--accent-primary);
+}
+
+.category-card h3 {
+  font-size: 1.25rem;
+  color: white;
+}
+
+/* Trending Section */
+.trending-section {
+  padding-bottom: 5rem;
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .hero-search-input-wrapper {
+    flex-direction: column;
+    background: transparent;
+    box-shadow: none;
+    gap: 1rem;
+  }
+  
+  .hero-search-icon {
+    top: 1.2rem;
+    z-index: 2;
+  }
+  
+  .hero-search-input {
+    background: white;
+    border-radius: var(--radius-full);
+    width: 100%;
+  }
+  
+  .hero-search-btn {
+    width: 100%;
+  }
+}
+
+/* Featured Event Spotlight */
+.featured-section {
+  padding-top: 3rem;
+  padding-bottom: 2rem;
+}
+
+.featured-event-card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  min-height: 260px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 2.5rem;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.featured-event-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.featured-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 60%;
+}
+
+.featured-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--warning);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.featured-title {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  color: white;
+  line-height: 1.2;
+}
+
+.featured-venue {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.featured-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.featured-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  margin-top: 0.5rem;
+}
+
+.featured-price-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  flex-shrink: 0;
+}
+
+.from-text {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.price-large {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  font-family: var(--font-display);
+}
+
+/* Enhanced Category Cards */
+.category-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  transition: transform var(--transition-fast);
+}
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.category-concerts .category-icon-wrapper { background-color: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+.category-sports .category-icon-wrapper   { background-color: rgba(16, 185, 129, 0.2); color: #34d399; }
+.category-arts .category-icon-wrapper     { background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.category-family .category-icon-wrapper   { background-color: rgba(2, 101, 220, 0.2);  color: #60a5fa; }
+
+.category-card:hover .category-icon-wrapper {
+  transform: scale(1.15);
+}
+
+.category-concerts:hover { background-color: rgba(139, 92, 246, 0.15); border-color: #7c3aed; }
+.category-sports:hover   { background-color: rgba(16, 185, 129, 0.15); border-color: #059669; }
+.category-arts:hover     { background-color: rgba(245, 158, 11, 0.15); border-color: #d97706; }
+.category-family:hover   { background-color: rgba(2, 101, 220, 0.15);  border-color: #0265DC; }
+
+@media (max-width: 640px) {
+  .featured-event-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  .featured-content { max-width: 100%; }
+  .featured-price-tag { align-items: flex-start; }
+}
+

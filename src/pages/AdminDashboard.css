@@ -1,0 +1,201 @@
+.admin-page {
+  padding-top: 3rem;
+  padding-bottom: 5rem;
+}
+
+.admin-header {
+  margin-bottom: 3rem;
+}
+
+.admin-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+.admin-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.admin-section {
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+}
+
+/* Add Event Form */
+.add-event-form {
+  background-color: var(--bg-tertiary);
+  padding: 2rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 3rem;
+  border: 1px solid var(--border-color);
+}
+
+.add-event-form h3 {
+  margin-bottom: 1.5rem;
+  color: white;
+  font-size: 1.25rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.form-group input, .form-group select {
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: white;
+  font-size: 1rem;
+  outline: none;
+}
+
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--accent-primary);
+}
+
+.checkbox-group {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Table */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.events-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.events-table th, .events-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.events-table th {
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.events-table td {
+  color: white;
+  vertical-align: middle;
+}
+
+.event-cell-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-cell-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.event-cell-venue {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.current-price {
+  font-weight: 600;
+  color: var(--success);
+}
+
+.price-edit-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  padding: 0.25rem 0.5rem;
+  width: 100px;
+}
+
+.price-edit-input input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: white;
+  outline: none;
+  font-weight: 600;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.icon-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: white;
+}
+
+.icon-btn.success:hover {
+  color: var(--success);
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.icon-btn.danger:hover {
+  color: var(--danger);
+  background-color: rgba(239, 68, 68, 0.1);
+}
