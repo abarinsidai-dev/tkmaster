@@ -122,6 +122,7 @@ function EventDetails() {
                 <span className="seat-panel-count">{selectedSeats.length} seat{selectedSeats.length !== 1 ? 's' : ''} selected</span>
               </div>
               <SeatSelector
+                key={selectedSection.id}
                 section={selectedSection}
                 selectedSeats={selectedSeats}
                 onSeatSelect={setSelectedSeats}
