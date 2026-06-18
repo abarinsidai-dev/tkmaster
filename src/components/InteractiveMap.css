@@ -1,0 +1,109 @@
+.interactive-map-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-secondary);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-top: 1rem;
+}
+
+.stage-indicator {
+  background: var(--accent);
+  color: white;
+  padding: 0.5rem 4rem;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 2rem;
+  text-align: center;
+  border-bottom: 4px solid var(--accent-hover);
+}
+
+.stadium-svg {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+}
+
+.row-label {
+  fill: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.seat {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  stroke-width: 2;
+}
+
+.seat-available {
+  fill: var(--bg-primary);
+  stroke: var(--text-secondary);
+}
+
+.seat-available:hover {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.seat-selected {
+  fill: var(--accent);
+  stroke: var(--accent);
+  transform-origin: center;
+  animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.seat-locked {
+  fill: var(--border);
+  stroke: var(--bg-primary);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.map-legend {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  width: 100%;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.available {
+  border: 2px solid var(--text-secondary);
+  background: var(--bg-primary);
+}
+
+.legend-dot.selected {
+  background: var(--accent);
+}
+
+.legend-dot.locked {
+  background: var(--border);
+  opacity: 0.5;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}

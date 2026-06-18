@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Info, Plus, Minus, Check, ShieldCheck, Star, ChevronRight } from 'lucide-react';
 import { useEvents } from '../context/EventContext';
 import EventCard from '../components/EventCard';
-import SeatSelector from '../components/SeatSelector';
+import InteractiveMap from '../components/InteractiveMap';
 import './EventDetails.css';
 
 function EventDetails() {
@@ -38,6 +38,20 @@ function EventDetails() {
     } else {
       setSelectedSection(section);
       setSelectedSeats([]);
+    }
+  };
+
+  const handleSeatToggle = (seatData, isSelecting) => {
+    if (!seatData) {
+      // Force clear all (e.g. socket disconnected or lock failed)
+      setSelectedSeats([]);
+      return;
+    }
+
+    if (isSelecting) {
+      setSelectedSeats(prev => [...prev, seatData]);
+    } else {
+      setSelectedSeats(prev => prev.filter(s => s.id !== seatData.id));
     }
   };
 
@@ -121,11 +135,11 @@ function EventDetails() {
                 <h4>{selectedSection.name}</h4>
                 <span className="seat-panel-count">{selectedSeats.length} seat{selectedSeats.length !== 1 ? 's' : ''} selected</span>
               </div>
-              <SeatSelector
-                key={selectedSection.id}
+              <InteractiveMap
+                eventId={event.id}
                 section={selectedSection}
                 selectedSeats={selectedSeats}
-                onSeatSelect={setSelectedSeats}
+                onSeatToggle={handleSeatToggle}
               />
             </div>
           )}

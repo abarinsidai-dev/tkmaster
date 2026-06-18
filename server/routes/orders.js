@@ -36,4 +36,30 @@ router.post('/', authMiddleware, async (req, res) => {
   }
 });
 
+// @route   PUT /api/orders/:id/checkin
+// @desc    Mark an order/ticket as checked in
+// @access  Private (Admin only conceptually, but simply auth'd here)
+router.put('/:id/checkin', authMiddleware, async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const order = await Order.findById(orderId);
+    
+    if (!order) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    if (order.checkedIn) {
+      return res.status(400).json({ error: 'Ticket has already been scanned and used!' });
+    }
+
+    order.checkedIn = true;
+    const updatedOrder = await order.save();
+    
+    res.json(updatedOrder);
+  } catch (err) {
+    console.error('Checkin error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

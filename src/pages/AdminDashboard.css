@@ -172,6 +172,52 @@
   gap: 0.5rem;
 }
 
+.scanner-section {
+  text-align: center;
+}
+
+.scanner-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 2rem auto;
+  aspect-ratio: 1;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scanner-cooldown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  padding: 2rem;
+}
+
+.scan-success {
+  color: var(--success);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 600;
+}
+
+.scan-error {
+  color: var(--danger);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  font-weight: 600;
+}
+
 .icon-btn {
   background: transparent;
   border: none;

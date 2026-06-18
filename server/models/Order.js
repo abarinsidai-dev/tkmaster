@@ -32,7 +32,8 @@ const orderSchema = new mongoose.Schema(
     seats: [seatSchema],
     ticketCount: { type: Number, required: true, default: 1 },
     totalPaid: { type: Number, required: true },
-    purchaseDate: { type: Date, default: Date.now }
+    purchaseDate: { type: Date, default: Date.now },
+    checkedIn: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

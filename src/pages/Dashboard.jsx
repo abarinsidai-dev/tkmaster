@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Ticket, Calendar, MapPin, Clock, QrCode, User, Bell, CreditCard, LogOut } from 'lucide-react';
+import { Ticket, Calendar, MapPin, Clock, User, Bell, CreditCard, LogOut, CheckCircle } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 

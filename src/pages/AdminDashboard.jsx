@@ -1,15 +1,22 @@
 import { useState } from 'react';
 import { useEvents } from '../context/EventContext';
-import { mockCategories } from '../data/mockData';
-import { Plus, Edit2, Check, X } from 'lucide-react';
+import { Plus, Edit2, Check, X, Camera, CalendarDays } from 'lucide-react';
+import { Scanner } from '@yudiel/react-qr-scanner';
+import { useAuth } from '../context/AuthContext';
 import './AdminDashboard.css';
 
 function AdminDashboard() {
   const { events, addEvent, updateEventPrice } = useEvents();
+  const { getAuthHeaders } = useAuth();
   
+  const [activeTab, setActiveTab] = useState('events');
   const [isAddingEvent, setIsAddingEvent] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [editPrice, setEditPrice] = useState('');
+  
+  const [scanResult, setScanResult] = useState(null);
+  const [scanError, setScanError] = useState('');
+  const [isScanning, setIsScanning] = useState(true);
 
   const [newEvent, setNewEvent] = useState({
     title: '',
@@ -52,6 +59,42 @@ function AdminDashboard() {
     setNewEvent({ ...newEvent, title: '', venue: '', date: '', dateISO: '' });
   };
 
+  const handleScan = async (result) => {
+    if (!result || !result[0]) return;
+    const ticketId = result[0].rawValue;
+    
+    // Prevent double scanning immediately
+    if (!isScanning) return;
+    setIsScanning(false);
+    setScanResult(null);
+    setScanError('');
+
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_BASE}/api/orders/${ticketId}/checkin`, {
+        method: 'PUT',
+        headers: getAuthHeaders()
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to check in ticket');
+      }
+      
+      setScanResult(`Success! Checked in 1 ticket for ${data.eventTitle}`);
+    } catch (err) {
+      setScanError(err.message);
+    }
+
+    // Allow scanning again after 3 seconds
+    setTimeout(() => {
+      setIsScanning(true);
+      setScanResult(null);
+      setScanError('');
+    }, 3000);
+  };
+
   return (
     <div className="admin-page container animate-fade-in">
       <div className="admin-header">
@@ -59,9 +102,24 @@ function AdminDashboard() {
         <p className="admin-subtitle">Manage events and prices across the platform.</p>
       </div>
 
-      {/* Events Table */}
-      <div className="admin-section glass-panel">
-        <div className="section-header">
+      <div className="dashboard-tabs">
+        <button 
+          className={`tab-btn ${activeTab === 'events' ? 'active' : ''}`}
+          onClick={() => setActiveTab('events')}
+        >
+          <CalendarDays size={18} /> Manage Events
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'scanner' ? 'active' : ''}`}
+          onClick={() => setActiveTab('scanner')}
+        >
+          <Camera size={18} /> Scan Tickets
+        </button>
+      </div>
+
+      {activeTab === 'events' && (
+        <div className="admin-section glass-panel">
+          <div className="section-header">
           <h2>Manage Events</h2>
           <button className="btn-primary flex-center" onClick={() => setIsAddingEvent(!isAddingEvent)}>
             <Plus size={16} style={{ marginRight: '0.5rem' }} /> Add New Event
@@ -91,7 +149,10 @@ function AdminDashboard() {
               <div className="form-group">
                 <label>Category</label>
                 <select value={newEvent.category} onChange={e => setNewEvent({...newEvent, category: e.target.value})}>
-                  {mockCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  <option value="concerts">Concerts</option>
+                  <option value="sports">Sports</option>
+                  <option value="arts">Arts & Theatre</option>
+                  <option value="family">Family</option>
                 </select>
               </div>
               <div className="form-group">
@@ -177,6 +238,25 @@ function AdminDashboard() {
           </table>
         </div>
       </div>
+      )}
+
+      {activeTab === 'scanner' && (
+        <div className="admin-section glass-panel scanner-section">
+          <h2>Ticket Scanner</h2>
+          <p>Scan a digital ticket's QR code to mark it as checked-in.</p>
+          
+          <div className="scanner-container">
+            {isScanning ? (
+              <Scanner onScan={handleScan} />
+            ) : (
+              <div className="scanner-cooldown">
+                {scanResult && <div className="scan-success"><Check size={32} /> <p>{scanResult}</p></div>}
+                {scanError && <div className="scan-error"><X size={32} /> <p>{scanError}</p></div>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

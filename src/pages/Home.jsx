@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Music, Trophy, Palette, Users, Zap, Star, ArrowRight } from 'lucide-react';
 import EventCard from '../components/EventCard';
+import AIAssistant from '../components/AIAssistant';
 import { mockCategories } from '../data/mockData';
 import { useEvents } from '../context/EventContext';
 import './Home.css';
@@ -121,9 +122,10 @@ function Home() {
           ))}
         </div>
       </section>
+      
+      <AIAssistant />
     </div>
   );
 }
 
 export default Home;
-
