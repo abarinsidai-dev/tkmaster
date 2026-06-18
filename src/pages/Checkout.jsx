@@ -14,6 +14,8 @@ function Checkout() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
 
+  const API_BASE = import.meta.env.VITE_API_URL || '';
+
   useEffect(() => {
     if (!event || isSuccess) return;
 
@@ -79,7 +81,7 @@ function Checkout() {
         purchaseDate: new Date().toISOString()
       };
       
-      const response = await fetch('/api/orders', {
+      const response = await fetch(`${API_BASE}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -11,11 +11,13 @@ function Dashboard() {
   const [myTickets, setMyTickets] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const API_BASE = import.meta.env.VITE_API_URL || '';
+
   useEffect(() => {
     async function fetchMyTickets() {
       if (!currentUser) return;
       try {
-        const response = await fetch('/api/orders/mine', {
+        const response = await fetch(`${API_BASE}/api/orders/mine`, {
           headers: getAuthHeaders()
         });
         if (!response.ok) throw new Error('Failed to fetch tickets');

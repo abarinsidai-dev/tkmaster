@@ -10,6 +10,8 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const API_BASE = import.meta.env.VITE_API_URL || '';
+
   // Helper to attach token
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
@@ -20,7 +22,7 @@ export function AuthProvider({ children }) {
     // Check for existing session
     const token = localStorage.getItem('token');
     if (token) {
-      fetch('/api/auth/me', { headers: getAuthHeaders() })
+      fetch(`${API_BASE}/api/auth/me`, { headers: getAuthHeaders() })
         .then(res => {
           if (!res.ok) throw new Error('Token invalid');
           return res.json();
@@ -39,7 +41,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function signup(email, password, name) {
-    const res = await fetch('/api/auth/signup', {
+    const res = await fetch(`${API_BASE}/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password, name })
@@ -53,7 +55,7 @@ export function AuthProvider({ children }) {
   }
 
   async function login(email, password) {
-    const res = await fetch('/api/auth/login', {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })

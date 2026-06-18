@@ -10,8 +10,10 @@ export function EventProvider({ children }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const API_BASE = import.meta.env.VITE_API_URL || '';
+
   useEffect(() => {
-    fetch('/api/events')
+    fetch(`${API_BASE}/api/events`)
       .then(res => res.json())
       .then(data => {
         setEvents(data);
@@ -25,7 +27,7 @@ export function EventProvider({ children }) {
 
   const addEvent = async (newEvent) => {
     try {
-      const res = await fetch('/api/events', {
+      const res = await fetch(`${API_BASE}/api/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newEvent)
@@ -41,7 +43,7 @@ export function EventProvider({ children }) {
 
   const updateEventPrice = async (id, newPrice) => {
     try {
-      const res = await fetch(`/api/events/${id}`, {
+      const res = await fetch(`${API_BASE}/api/events/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ price: parseFloat(newPrice) })
@@ -57,7 +59,7 @@ export function EventProvider({ children }) {
 
   const updateEvent = async (id, updatedData) => {
     try {
-      const res = await fetch(`/api/events/${id}`, {
+      const res = await fetch(`${API_BASE}/api/events/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData)
