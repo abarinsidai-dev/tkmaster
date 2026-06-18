@@ -50,8 +50,11 @@ function Checkout() {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const subtotal = section.price * tickets;
-  const serviceFee = subtotal * 0.18; // 18% mock service fee
+  // Use individual seat prices if seats were hand-picked, otherwise section price × count
+  const subtotal = seats && seats.length > 0
+    ? seats.reduce((sum, s) => sum + (s.price || section.price), 0)
+    : section.price * tickets;
+  const serviceFee = subtotal * 0.18;
   const orderProcessingFee = 2.95;
   const total = subtotal + serviceFee + orderProcessingFee;
 
@@ -202,7 +205,14 @@ function Checkout() {
             <div className="line-item">
               <div className="item-desc">
                 <span>Tickets</span>
-                <span className="item-subdesc">{section.name} x {tickets}</span>
+                {seats && seats.length > 0 ? (
+                  <span className="item-subdesc">
+                    {section.name} — {seats.length} seat{seats.length !== 1 ? 's' : ''}
+                    {seats.map(s => ` · Row ${s.row} #${s.number}`).join('')}
+                  </span>
+                ) : (
+                  <span className="item-subdesc">{section.name} x {tickets}</span>
+                )}
               </div>
               <span className="item-price">${subtotal.toFixed(2)}</span>
             </div>

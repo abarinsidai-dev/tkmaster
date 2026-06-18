@@ -38,7 +38,7 @@ function SearchResults() {
     filtered = filtered.filter(e => e.price <= maxPrice);
 
     // Date filter
-    const today = new Date('2026-06-17T00:00:00Z'); // Fixed today's date based on mock data
+    const today = new Date();
     
     if (dateFilter !== 'any') {
       filtered = filtered.filter(e => {
@@ -63,7 +63,7 @@ function SearchResults() {
     }
 
     setEvents(filtered);
-  }, [initialQuery, activeCategory, dateFilter, maxPrice]);
+  }, [initialQuery, activeCategory, dateFilter, maxPrice, globalEvents]);
 
   return (
     <div className="search-results-page container animate-fade-in">

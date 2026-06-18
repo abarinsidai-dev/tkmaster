@@ -16,7 +16,7 @@ const CATEGORY_ICONS = {
 function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-  const { events, addEvent } = useEvents();
+  const { events } = useEvents();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -25,25 +25,6 @@ function Home() {
     }
   };
 
-  const handleAddTestEvent = async () => {
-    try {
-      await addEvent({
-        title: 'AI Generated Test Event',
-        date: 'Oct 31, 2026 • 8:00 PM',
-        dateISO: '2026-10-31T20:00:00',
-        venue: 'Test Arena, Cyber City',
-        price: 99.99,
-        category: 'concerts',
-        image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
-        description: 'This is a test event injected for debugging purposes.',
-        isHighDemand: true
-      });
-      alert('Test event added successfully!');
-    } catch (err) {
-      console.error(err);
-      alert('Failed to add event. Check console for details.');
-    }
-  };
 
   const featuredEvent = events.find(e => e.isPlatinum && e.isHighDemand) || events[0];
 
@@ -72,12 +53,7 @@ function Home() {
             </div>
           </form>
 
-          <button 
-            onClick={handleAddTestEvent} 
-            style={{ marginTop: '2rem', background: '#eab308', color: '#000', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            Add Test Event to Database
-          </button>
+
         </div>
       </section>
 

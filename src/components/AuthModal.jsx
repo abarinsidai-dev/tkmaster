@@ -35,8 +35,8 @@ function AuthModal({ onClose }) {
         errorMessage = "Please enter a valid email address.";
       } else if (err.message) {
         // Fallback for unexpected errors
-        errorMessage = err.message.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim();
-        if (errorMessage === 'Error') errorMessage = "Something went wrong. Please try again.";
+        errorMessage = err.message;
+        console.error("Auth error details:", err);
       }
       
       setError(errorMessage);
