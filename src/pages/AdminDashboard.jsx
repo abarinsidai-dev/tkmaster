@@ -21,17 +21,34 @@ function AdminDashboard() {
 
   const [newEvent, setNewEvent] = useState({
     title: '',
+    venue: '',
     date: '',
     dateISO: '',
-    venue: '',
-    price: 100,
+    price: 50,
     category: 'concerts',
-    image: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1540039155732-611114cb5527?auto=format&fit=crop&q=80',
     isHighDemand: false,
     isPlatinum: false,
     isSellingFast: false,
     description: 'This is a custom event added by the admin.',
   });
+
+  const [sections, setSections] = useState([
+    { id: 'sec1', name: 'General Admission', price: 50, color: '#3b82f6' }
+  ]);
+
+  const handleAddSection = () => {
+    setSections([
+      ...sections,
+      { id: `sec${sections.length + 1}`, name: '', price: 0, color: '#' + Math.floor(Math.random()*16777215).toString(16) }
+    ]);
+  };
+
+  const handleSectionChange = (index, field, value) => {
+    const updated = [...sections];
+    updated[index][field] = field === 'price' ? parseFloat(value) || 0 : value;
+    setSections(updated);
+  };
 
   const handleStartEdit = (event) => {
     setEditingId(event.id);
@@ -46,18 +63,22 @@ function AdminDashboard() {
   const handleAddSubmit = (e) => {
     e.preventDefault();
     
-    // Auto-generate a formatted date based on ISO if it's missing (for simplicity in this mock)
     const formattedDate = newEvent.date || new Date(newEvent.dateISO || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    
+    // Sort sections by price descending
+    const sortedSections = [...sections].sort((a, b) => b.price - a.price);
     
     addEvent({
       ...newEvent,
       date: formattedDate,
       dateISO: newEvent.dateISO || new Date().toISOString(),
+      sections: sortedSections,
+      price: sortedSections.length > 0 ? sortedSections[sortedSections.length - 1].price : newEvent.price // base price is cheapest
     });
     
     setIsAddingEvent(false);
-    // Reset form
     setNewEvent({ ...newEvent, title: '', venue: '', date: '', dateISO: '' });
+    setSections([{ id: 'sec1', name: 'General Admission', price: 50, color: '#3b82f6' }]);
   };
 
   const handleScan = async (result) => {
@@ -165,6 +186,28 @@ function AdminDashboard() {
               <div className="form-group">
                 <label>Image URL</label>
                 <input type="text" value={newEvent.image} onChange={e => setNewEvent({...newEvent, image: e.target.value})} />
+              </div>
+            </div>
+
+            <div className="sections-builder" style={{ margin: '1.5rem 0', background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h4 style={{ margin: 0 }}>Ticket Tiers / Sections</h4>
+                <button type="button" className="btn-secondary" onClick={handleAddSection} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
+                  + Add Tier
+                </button>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {sections.map((sec, i) => (
+                  <div key={i} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: sec.color }}></div>
+                    <input type="text" placeholder="Section Name" required value={sec.name} onChange={e => handleSectionChange(i, 'name', e.target.value)} style={{ flex: 1 }} />
+                    <input type="number" placeholder="Price" min="0" step="0.01" required value={sec.price} onChange={e => handleSectionChange(i, 'price', e.target.value)} style={{ width: '100px' }} />
+                    {sections.length > 1 && (
+                      <button type="button" onClick={() => setSections(sections.filter((_, idx) => idx !== i))} style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer' }}><X size={18} /></button>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
             

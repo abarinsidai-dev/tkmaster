@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Ticket, Calendar, MapPin, Clock, User, Bell, CreditCard, LogOut, CheckCircle, Download, Tag, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../context/AuthContext';
@@ -210,7 +211,13 @@ function Dashboard() {
   );
 
   return (
-    <div className="dashboard-page container animate-fade-in">
+    <motion.div 
+      className="dashboard-page container animate-fade-in"
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="dashboard-header">
         <h1>My Account</h1>
         <div className="dashboard-tabs">
@@ -445,7 +452,7 @@ function Dashboard() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 

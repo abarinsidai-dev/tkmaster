@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
 import { Ticket, Tag, Calendar, MapPin, ShoppingBag, TrendingUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Marketplace.css';
@@ -55,7 +57,19 @@ function Marketplace() {
   };
 
   return (
-    <div className="marketplace-page container animate-fade-in">
+    <motion.div 
+      className="marketplace-page container animate-fade-in"
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Helmet>
+        <title>Fan Marketplace | tickt</title>
+        <meta name="description" content="Buy and sell fan-listed tickets for sold-out events." />
+        <meta property="og:title" content="Fan Marketplace | tickt" />
+      </Helmet>
+
       <div className="marketplace-header">
         <div className="marketplace-title-group">
           <ShoppingBag size={32} className="marketplace-icon" />
@@ -129,7 +143,7 @@ function Marketplace() {
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 

@@ -1,48 +1,34 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Lock, AlertCircle, CheckCircle2, Ticket, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Lock, Clock, Ticket, CheckCircle2, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useEvents } from '../context/EventContext';
 import './Checkout.css';
 
-function Checkout() {
-  const location = useLocation();
+export default function Checkout({ eventId, onClose, selectedSection, selectedSeats = [], ticketCount = 1 }) {
   const navigate = useNavigate();
-  const { event, tickets, section, seats } = location.state || {};
   const { currentUser, getAuthHeaders } = useAuth();
+  const { getEventById } = useEvents();
+  const event = getEventById(eventId);
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
-
-  const API_BASE = import.meta.env.VITE_API_URL || '';
+  const [timeLeft, setTimeLeft] = useState(600);
 
   useEffect(() => {
-    if (!event || isSuccess) return;
-
-    if (timeLeft <= 0) {
-      alert("Time expired! Releasing your tickets.");
-      navigate(`/event/${event.id}`);
-      return;
-    }
-
     const timer = setInterval(() => {
       setTimeLeft(prev => prev - 1);
     }, 1000);
 
+    if (timeLeft <= 0) {
+      alert("Time expired! Releasing your tickets.");
+      onClose();
+    }
     return () => clearInterval(timer);
-  }, [timeLeft, event, navigate, isSuccess]);
+  }, [timeLeft, onClose]);
 
-  // If someone navigates here directly without state
-  if (!event) {
-    return (
-      <div className="container" style={{ padding: '5rem 0', textAlign: 'center' }}>
-        <h2>No tickets selected</h2>
-        <Link to="/" className="btn-primary" style={{ display: 'inline-block', marginTop: '1rem' }}>
-          Back to Home
-        </Link>
-      </div>
-    );
-  }
+  if (!event) return null;
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -50,203 +36,134 @@ function Checkout() {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  // Use individual seat prices if seats were hand-picked, otherwise section price × count
-  const subtotal = seats && seats.length > 0
-    ? seats.reduce((sum, s) => sum + (s.price || section.price), 0)
-    : section.price * tickets;
+  const finalSection = selectedSection || { name: 'General Admission', price: event?.price || 0 };
+  const subtotal = selectedSeats && selectedSeats.length > 0
+    ? selectedSeats.reduce((sum, s) => sum + (s.price || finalSection.price), 0)
+    : finalSection.price * ticketCount;
+    
   const serviceFee = subtotal * 0.18;
   const orderProcessingFee = 2.95;
   const total = subtotal + serviceFee + orderProcessingFee;
 
-  const handlePayment = async (e) => {
-    e.preventDefault();
+  const handlePayment = async () => {
+    if (!currentUser) return;
     setIsProcessing(true);
     
     try {
-      // Simulate payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Save order to Firestore
       const orderData = {
-        userId: currentUser.uid,
         eventId: event.id,
         eventTitle: event.title,
         eventDate: event.date,
         eventVenue: event.venue,
         eventImage: event.image,
-        section: section,
-        seats: seats || [],
-        ticketCount: tickets,
-        totalPaid: total,
-        purchaseDate: new Date().toISOString()
+        section: finalSection,
+        seats: selectedSeats || [],
+        ticketCount: ticketCount,
+        totalPaid: total
       };
-      
+
+      const API_BASE = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${API_BASE}/api/orders`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeaders()
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(orderData)
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to create order');
-      }
-      
+
+      if (!response.ok) throw new Error('Order failed');
       setIsSuccess(true);
+      setTimeout(() => {
+        onClose();
+        navigate('/dashboard');
+      }, 2000);
+
     } catch (error) {
-      console.error("Error processing order: ", error);
-      alert("There was an error processing your order. Please try again.");
-    } finally {
+      alert('Payment failed. Please try again.');
       setIsProcessing(false);
     }
   };
 
-  if (isSuccess) {
-    return (
-      <div className="checkout-success container animate-fade-in">
-        <CheckCircle2 size={64} className="success-icon" />
-        <h1>You're all set!</h1>
-        <p className="success-message">
-          Your order has been placed. We've sent a confirmation email with your tickets.
-        </p>
-        <div className="ticket-preview glass-panel">
-          <Ticket size={24} className="ticket-icon" />
-          <div className="ticket-preview-details">
-            <h3>{event.title}</h3>
-            <p>{event.date}</p>
-            <p>{tickets}x {section.name}</p>
-          </div>
-        </div>
-        <button className="btn-primary" onClick={() => navigate('/dashboard')}>
-          View My Tickets
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="checkout-page container animate-fade-in">
-      <div className="checkout-header">
-        <h1>Checkout</h1>
-        <div className="checkout-header-right">
-          <div className={`countdown-timer ${timeLeft < 120 ? 'danger' : ''}`}>
-            <Clock size={16} />
-            <span>Time left to buy: {formatTime(timeLeft)}</span>
-          </div>
-          <div className="secure-badge">
-            <Lock size={16} /> Secure Payment
-          </div>
+    <motion.div 
+      className="checkout-drawer-overlay"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      onClick={onClose}
+    >
+      <motion.div 
+        className="checkout-drawer glass-panel"
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="drawer-header">
+          <h2>Secure Checkout</h2>
+          <button className="drawer-close-btn" onClick={onClose}><X size={24} /></button>
         </div>
-      </div>
 
-      <div className="checkout-layout">
-        {/* Payment Form */}
-        <div className="checkout-main glass-panel">
-          <div className="form-section">
-            <h2>Delivery</h2>
-            <div className="delivery-option">
-              <input type="radio" checked readOnly />
-              <div className="delivery-details">
-                <span className="delivery-title">Mobile Ticket</span>
-                <span className="delivery-desc">Free - Your phone's your ticket. Locate your tickets in your account.</span>
-              </div>
-            </div>
+        {isSuccess ? (
+          <div className="checkout-success animate-fade-in" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+            <CheckCircle2 size={64} className="success-icon" style={{ color: 'var(--success)', margin: '0 auto 1rem' }} />
+            <h1 style={{ marginBottom: '0.5rem' }}>You're all set!</h1>
+            <p className="success-message" style={{ color: 'var(--text-secondary)' }}>
+              Order placed. Redirecting to your dashboard...
+            </p>
           </div>
-
-          <form onSubmit={handlePayment} className="form-section">
-            <h2>Payment Method</h2>
-            
-            <div className="payment-warning">
-              <AlertCircle size={20} />
-              <p>This is a mock checkout. Do not enter real credit card information.</p>
-            </div>
-
-            <div className="form-group">
-              <label>Name on Card</label>
-              <input type="text" placeholder="John Doe" required className="form-input" />
-            </div>
-
-            <div className="form-group">
-              <label>Card Number</label>
-              <input type="text" placeholder="0000 0000 0000 0000" maxLength="19" required className="form-input" />
-            </div>
-
-            <div className="form-row">
-              <div className="form-group half">
-                <label>Expiration Date</label>
-                <input type="text" placeholder="MM/YY" maxLength="5" required className="form-input" />
+        ) : (
+          <div className="drawer-content">
+            <div className="checkout-header-bar" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+              <div className={`countdown-timer ${timeLeft < 120 ? 'danger' : ''}`} style={{ display: 'flex', gap: '0.5rem', color: timeLeft < 120 ? 'var(--error)' : 'var(--text-primary)' }}>
+                <Clock size={16} />
+                <span>Time left to buy: {formatTime(timeLeft)}</span>
               </div>
-              <div className="form-group half">
-                <label>Security Code</label>
-                <input type="text" placeholder="CVC" maxLength="4" required className="form-input" />
+              <div className="secure-badge" style={{ display: 'flex', gap: '0.5rem', color: 'var(--success)' }}>
+                <Lock size={16} /> Secure Payment
               </div>
             </div>
 
-            <div className="form-group">
-              <label>Billing Zip/Postal Code</label>
-              <input type="text" placeholder="Zip Code" required className="form-input" />
+            <div className="checkout-summary-box" style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem' }}>
+              <h3 style={{ margin: '0 0 1rem' }}>Order Summary</h3>
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                <img src={event.image} alt={event.title} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }} />
+                <div>
+                  <h4 style={{ margin: '0 0 0.25rem' }}>{event.title}</h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{event.date}</p>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{event.venue}</p>
+                </div>
+              </div>
+
+              <div className="summary-line" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span>{ticketCount}x {finalSection.name}</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              <div className="summary-line" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                <span>Service Fee</span>
+                <span>${serviceFee.toFixed(2)}</span>
+              </div>
+              <div className="summary-line" style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                <span>Order Processing</span>
+                <span>${orderProcessingFee.toFixed(2)}</span>
+              </div>
+              <div className="summary-total" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', fontSize: '1.2rem', fontWeight: 'bold' }}>
+                <span>Total</span>
+                <span style={{ color: 'var(--accent)' }}>${total.toFixed(2)}</span>
+              </div>
             </div>
 
             <button 
-              type="submit" 
-              className={`btn-primary place-order-btn ${isProcessing ? 'loading' : ''}`}
+              className={`btn-primary full-width ${isProcessing ? 'loading' : ''}`}
+              onClick={handlePayment}
               disabled={isProcessing}
+              style={{ padding: '1rem', fontSize: '1.1rem' }}
             >
-              {isProcessing ? 'Processing...' : `Place Order • $${total.toFixed(2)}`}
+              {isProcessing ? 'Processing Payment...' : `Pay $${total.toFixed(2)}`}
             </button>
-          </form>
-        </div>
-
-        {/* Order Summary Sidebar */}
-        <div className="order-summary-sidebar glass-panel">
-          <div className="summary-header">
-            <h3>Total</h3>
-            <span className="summary-total-large">${total.toFixed(2)}</span>
           </div>
-          
-          <div className="summary-event-details">
-            <h4>{event.title}</h4>
-            <p className="summary-venue">{event.venue}</p>
-            <p className="summary-date">{event.date}</p>
-          </div>
-
-          <div className="summary-line-items">
-            <div className="line-item">
-              <div className="item-desc">
-                <span>Tickets</span>
-                {seats && seats.length > 0 ? (
-                  <span className="item-subdesc">
-                    {section.name} — {seats.length} seat{seats.length !== 1 ? 's' : ''}
-                    {seats.map(s => ` · Row ${s.row} #${s.number}`).join('')}
-                  </span>
-                ) : (
-                  <span className="item-subdesc">{section.name} x {tickets}</span>
-                )}
-              </div>
-              <span className="item-price">${subtotal.toFixed(2)}</span>
-            </div>
-            <div className="line-item">
-              <span>Service Fee</span>
-              <span className="item-price">${serviceFee.toFixed(2)}</span>
-            </div>
-            <div className="line-item">
-              <span>Order Processing Fee</span>
-              <span className="item-price">${orderProcessingFee.toFixed(2)}</span>
-            </div>
-          </div>
-
-          <div className="terms-agreement">
-            <input type="checkbox" required id="terms" />
-            <label htmlFor="terms">
-              I have read and agree to the Terms of Use. All sales are final.
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
+        )}
+      </motion.div>
+    </motion.div>
   );
 }
-
-export default Checkout;

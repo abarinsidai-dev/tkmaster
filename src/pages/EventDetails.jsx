@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, MapPin, Info, Plus, Minus, Check, ShieldCheck, Star, ChevronRight } from 'lucide-react';
 import { useEvents } from '../context/EventContext';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +9,7 @@ import EventCard from '../components/EventCard';
 import InteractiveMap from '../components/InteractiveMap';
 import VenueMap from '../components/VenueMap';
 import ShareCard from '../components/ShareCard';
+import Checkout from './Checkout';
 import './EventDetails.css';
 
 function EventDetails() {
@@ -90,21 +93,30 @@ function EventDetails() {
     : (selectedSection?.price || event?.price || 0) * ticketCount;
 
   const handleCheckout = () => {
+    if (!currentUser) {
+      alert('Please sign in to purchase tickets.');
+      return;
+    }
     setIsCheckingOut(true);
-    setTimeout(() => {
-      navigate('/checkout', { 
-        state: { 
-          event, 
-          tickets: selectedSeats.length > 0 ? selectedSeats.length : ticketCount, 
-          section: selectedSection || mockSections[3],
-          seats: selectedSeats
-        } 
-      });
-    }, 800);
   };
 
   return (
-    <div className="event-details-page animate-fade-in">
+    <motion.div 
+      className="event-details-page animate-fade-in"
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Helmet>
+        <title>{event.title} Tickets | tickt</title>
+        <meta name="description" content={`Buy tickets for ${event.title} at ${event.venue} on ${event.date}.`} />
+        <meta property="og:title" content={`${event.title} Tickets`} />
+        <meta property="og:description" content={`Join the waitlist or buy tickets for ${event.title}.`} />
+        <meta property="og:image" content={event.image} />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
+
       <div className="event-hero" style={{ backgroundImage: `linear-gradient(to right, rgba(10,10,11,1) 30%, rgba(10,10,11,0.4)), url(${event.image})` }}>
         <div className="container event-hero-content">
           <div className="event-badges">
@@ -271,7 +283,19 @@ function EventDetails() {
           </div>
         </div>
       </div>
-    </div>
+
+      <AnimatePresence>
+        {isCheckingOut && (
+          <Checkout 
+            eventId={event.id}
+            selectedSection={selectedSection}
+            selectedSeats={selectedSeats}
+            ticketCount={ticketCount}
+            onClose={() => setIsCheckingOut(false)}
+          />
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
 

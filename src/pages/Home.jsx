@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Search, Music, Trophy, Palette, Users, Zap, Star, ArrowRight } from 'lucide-react';
 import EventCard from '../components/EventCard';
 import AIAssistant from '../components/AIAssistant';
@@ -30,7 +31,13 @@ function Home() {
   const featuredEvent = events.find(e => e.isPlatinum && e.isHighDemand) || events[0];
 
   return (
-    <div className="home-page">
+    <motion.div 
+      className="home-page"
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.3 }}
+    >
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-overlay"></div>
@@ -124,7 +131,7 @@ function Home() {
       </section>
       
       <AIAssistant />
-    </div>
+    </motion.div>
   );
 }
 
