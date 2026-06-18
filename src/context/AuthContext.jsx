@@ -1,12 +1,4 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { 
-  onAuthStateChanged, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  updateProfile,
-  signOut 
-} from 'firebase/auth';
-import { auth } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -18,36 +10,73 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  async function signup(email, password, name) {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    if (name) {
-      await updateProfile(userCredential.user, { displayName: name });
+  // Helper to attach token
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+  };
+
+  useEffect(() => {
+    // Check for existing session
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetch('/api/auth/me', { headers: getAuthHeaders() })
+        .then(res => {
+          if (!res.ok) throw new Error('Token invalid');
+          return res.json();
+        })
+        .then(userData => {
+          setCurrentUser(userData);
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+          setCurrentUser(null);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-    return userCredential;
+  }, []);
+
+  async function signup(email, password, name) {
+    const res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    
+    localStorage.setItem('token', data.token);
+    setCurrentUser({ ...data.user, uid: data.user.id, displayName: data.user.name });
+    return data;
   }
 
-  function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password);
+  async function login(email, password) {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    
+    localStorage.setItem('token', data.token);
+    setCurrentUser({ ...data.user, uid: data.user.id, displayName: data.user.name });
+    return data;
   }
 
   function logout() {
-    return signOut(auth);
+    localStorage.removeItem('token');
+    setCurrentUser(null);
   }
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []);
 
   const value = {
     currentUser,
     login,
     signup,
-    logout
+    logout,
+    getAuthHeaders
   };
 
   return (

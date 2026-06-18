@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Ticket, Calendar, MapPin, Clock, QrCode, User, Bell, CreditCard, LogOut } from 'lucide-react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
 function Dashboard() {
   const navigate = useNavigate();
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, getAuthHeaders } = useAuth();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [myTickets, setMyTickets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,13 +15,11 @@ function Dashboard() {
     async function fetchMyTickets() {
       if (!currentUser) return;
       try {
-        const q = query(collection(db, 'orders'), where('userId', '==', currentUser.uid));
-        const querySnapshot = await getDocs(q);
-        const orders = [];
-        querySnapshot.forEach((doc) => {
-          orders.push({ id: doc.id, ...doc.data() });
+        const response = await fetch('/api/orders/mine', {
+          headers: getAuthHeaders()
         });
-        orders.sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
+        if (!response.ok) throw new Error('Failed to fetch tickets');
+        const orders = await response.json();
         setMyTickets(orders);
       } catch (error) {
         console.error('Error fetching tickets:', error);

@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Lock, AlertCircle, CheckCircle2, Ticket, Clock } from 'lucide-react';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import './Checkout.css';
 
@@ -10,7 +8,7 @@ function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { event, tickets, section, seats } = location.state || {};
-  const { currentUser } = useAuth();
+  const { currentUser, getAuthHeaders } = useAuth();
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -81,7 +79,18 @@ function Checkout() {
         purchaseDate: new Date().toISOString()
       };
       
-      await addDoc(collection(db, 'orders'), orderData);
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
+        body: JSON.stringify(orderData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create order');
+      }
       
       setIsSuccess(true);
     } catch (error) {
