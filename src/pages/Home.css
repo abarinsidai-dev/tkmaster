@@ -86,7 +86,7 @@
 .section-title {
   font-size: 2rem;
   margin-bottom: 2rem;
-  color: white;
+  color: var(--text-primary);
 }
 
 .section-header {
@@ -130,7 +130,7 @@
 
 .category-card h3 {
   font-size: 1.25rem;
-  color: white;
+  color: var(--text-primary);
 }
 
 /* Trending Section */

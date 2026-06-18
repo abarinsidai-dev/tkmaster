@@ -20,7 +20,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: white;
+  color: var(--text-primary);
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 1.25rem;
@@ -81,7 +81,7 @@
 }
 
 .nav-link:hover {
-  color: white;
+  color: var(--text-primary);
 }
 
 .navbar-actions {
@@ -104,7 +104,7 @@
 }
 
 .btn-icon:hover {
-  color: white;
+  color: var(--text-primary);
   background-color: var(--bg-secondary);
 }
 

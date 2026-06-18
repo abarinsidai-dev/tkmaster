@@ -62,7 +62,7 @@
 
 .seat-map-header h3 {
   font-size: 1.5rem;
-  color: white;
+  color: var(--text-primary);
 }
 
 .tooltip-hint {
@@ -189,7 +189,7 @@
 
 .ticket-selection-sidebar h3 {
   font-size: 1.5rem;
-  color: white;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
@@ -215,7 +215,7 @@
   height: 32px;
   border-radius: var(--radius-full);
   border: 1px solid var(--border-color);
-  color: white;
+  color: var(--text-primary);
   background-color: var(--bg-tertiary);
   transition: all var(--transition-fast);
 }
@@ -233,7 +233,7 @@
 .count-display {
   font-size: 1.25rem;
   font-weight: 600;
-  color: white;
+  color: var(--text-primary);
   width: 20px;
   text-align: center;
 }
@@ -281,7 +281,7 @@
   flex: 1;
   display: flex;
   justify-content: space-between;
-  color: white;
+  color: var(--text-primary);
 }
 
 .section-price {
@@ -302,7 +302,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: white;
+  color: var(--text-primary);
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
 }
@@ -351,7 +351,7 @@
 
 .event-about h3 {
   font-size: 1.5rem;
-  color: white;
+  color: var(--text-primary);
   margin-bottom: 1.25rem;
 }
 
@@ -402,7 +402,7 @@
 }
 
 .guarantee-text h4 {
-  color: white;
+  color: var(--text-primary);
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
 }
@@ -427,7 +427,7 @@
 
 .similar-events-header h3 {
   font-size: 1.5rem;
-  color: white;
+  color: var(--text-primary);
 }
 
 .view-all-link {
