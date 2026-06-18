@@ -10,7 +10,9 @@ const orderRoutes  = require('./routes/orders');
 const app = express();
 
 // ── Middleware ────────────────────────────────────────────
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+// Allow the frontend URL from environment variable, or allow all origins as a fallback
+const allowedOrigins = process.env.CLIENT_URL || '*';
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 // ── Routes ────────────────────────────────────────────────
