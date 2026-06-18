@@ -7,6 +7,7 @@ import EventDetails from './pages/EventDetails';
 import Checkout from './pages/Checkout';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import FomoNotification from './components/FomoNotification';
 import { EventProvider } from './context/EventContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -52,6 +53,7 @@ function AppRoutes() {
             </ProtectedAdminRoute>
           } />
         </Routes>
+        <FomoNotification />
       </main>
       <Footer />
     </div>

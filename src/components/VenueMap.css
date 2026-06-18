@@ -1,0 +1,50 @@
+.venue-map-wrapper {
+  margin-top: 2rem;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.venue-map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.venue-map-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.directions-btn {
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.directions-btn:hover {
+  opacity: 0.8;
+}
+
+.leaflet-map {
+  height: 300px;
+  width: 100%;
+}
+
+/* Override leaflet popup styles for dark mode */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-secondary);
+  color: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-secondary);
+}

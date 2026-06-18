@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Ticket, Calendar, MapPin, Clock, User, Bell, CreditCard, LogOut, CheckCircle } from 'lucide-react';
+import { Ticket, Calendar, MapPin, Clock, User, Bell, CreditCard, LogOut, CheckCircle, Download } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
@@ -13,6 +13,29 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const API_BASE = import.meta.env.VITE_API_URL || '';
+
+  const handleDownloadPDF = async (ticketId, eventTitle) => {
+    try {
+      const response = await fetch(`${API_BASE}/api/orders/${ticketId}/pdf`, {
+        headers: getAuthHeaders()
+      });
+      
+      if (!response.ok) throw new Error('Failed to generate PDF');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${eventTitle.replace(/\s+/g, '_')}_Ticket.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error(err);
+      alert('Error downloading ticket. Please try again.');
+    }
+  };
 
   useEffect(() => {
     async function fetchMyTickets() {
@@ -102,9 +125,20 @@ function Dashboard() {
         </div>
 
         <div className="qr-section">
-          <div className="qr-placeholder">
-            <QrCode size={120} />
-            <div className="scanning-line"></div>
+          <div className="qr-placeholder" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+            <QRCodeSVG value={order.id} size={120} />
+            <button 
+              className="btn-secondary mt-2" 
+              style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+              onClick={() => handleDownloadPDF(order.id, order.eventTitle)}
+            >
+              <Download size={14} /> Save PDF
+            </button>
+            {order.checkedIn && (
+              <div className="checked-in-badge" style={{ marginTop: '0.25rem', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 'bold' }}>
+                <CheckCircle size={16} /> Checked In
+              </div>
+            )}
           </div>
           <p className="qr-hint">Hold near reader</p>
           <div className="wallet-buttons">

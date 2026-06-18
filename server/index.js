@@ -24,6 +24,9 @@ const io = new Server(server, {
   }
 });
 
+// Make io accessible to routes
+app.set('io', io);
+
 // ── In-Memory Seat Locks ──────────────────────────────────
 // Structure: { eventId: { seatId: { socketId, timestamp } } }
 const lockedSeats = {};

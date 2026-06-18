@@ -4,6 +4,7 @@ import { Calendar, MapPin, Info, Plus, Minus, Check, ShieldCheck, Star, ChevronR
 import { useEvents } from '../context/EventContext';
 import EventCard from '../components/EventCard';
 import InteractiveMap from '../components/InteractiveMap';
+import VenueMap from '../components/VenueMap';
 import './EventDetails.css';
 
 function EventDetails() {
@@ -239,6 +240,8 @@ function EventDetails() {
               <p>All tickets purchased through Ticketmaster are 100% authentic and backed by our Fan Guarantee. If your event is cancelled, you'll get a full refund.</p>
             </div>
           </div>
+
+          <VenueMap venue={event.venue} eventTitle={event.title} />
         </div>
 
         {/* Similar Events */}
