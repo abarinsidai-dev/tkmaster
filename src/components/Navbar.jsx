@@ -60,9 +60,10 @@ function Navbar() {
 
           {/* Desktop nav links */}
           <div className="navbar-links hidden-mobile">
-            <Link to="/search?category=concerts" className="nav-link">Concerts</Link>
-            <Link to="/search?category=sports" className="nav-link">Sports</Link>
-            <Link to="/search?category=arts" className="nav-link">Arts &amp; Theater</Link>
+            <Link to="/search?category=Concerts" className="nav-link">Concerts</Link>
+            <Link to="/search?category=Sports" className="nav-link">Sports</Link>
+            <Link to="/search?category=Arts" className="nav-link">Arts & Theater</Link>
+            <Link to="/marketplace" className="nav-link" style={{ color: 'var(--accent)', fontWeight: 600 }}>Marketplace</Link>
           </div>
 
           <div className="navbar-actions">

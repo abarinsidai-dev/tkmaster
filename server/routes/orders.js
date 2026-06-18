@@ -19,6 +19,22 @@ router.get('/mine', authMiddleware, async (req, res) => {
   }
 });
 
+// @route   GET /api/orders/admin/all
+// @desc    Get all orders (for analytics)
+// @access  Private (Admin only)
+router.get('/admin/all', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.email !== 'admin@tickt.com') {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    const orders = await Order.find().lean();
+    res.json(orders);
+  } catch (err) {
+    console.error('Fetch all orders error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // @route   POST /api/orders
 // @desc    Create a new order
 // @access  Private

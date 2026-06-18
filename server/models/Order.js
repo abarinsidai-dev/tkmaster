@@ -33,7 +33,10 @@ const orderSchema = new mongoose.Schema(
     ticketCount: { type: Number, required: true, default: 1 },
     totalPaid: { type: Number, required: true },
     purchaseDate: { type: Date, default: Date.now },
-    checkedIn: { type: Boolean, default: false }
+    checkedIn: { type: Boolean, default: false },
+    isListed: { type: Boolean, default: false },
+    resalePrice: { type: Number, default: null },
+    originalBuyerId: { type: String, default: null }
   },
   { timestamps: true }
 );

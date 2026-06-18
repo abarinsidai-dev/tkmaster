@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Ticket, Calendar, MapPin, Clock, User, Bell, CreditCard, LogOut, CheckCircle, Download } from 'lucide-react';
+import { Ticket, Calendar, MapPin, Clock, User, Bell, CreditCard, LogOut, CheckCircle, Download, Tag, X } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
@@ -8,8 +8,11 @@ import './Dashboard.css';
 function Dashboard() {
   const navigate = useNavigate();
   const { currentUser, logout, getAuthHeaders } = useAuth();
+  const [orders, setOrders] = useState([]);
+  const [waitlist, setWaitlist] = useState([]);
   const [activeTab, setActiveTab] = useState('upcoming');
-  const [myTickets, setMyTickets] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [resalePrice, setResalePrice] = useState('');
   const [loading, setLoading] = useState(true);
 
   const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -38,35 +41,78 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    async function fetchMyTickets() {
+    async function fetchData() {
       if (!currentUser) return;
       try {
-        const response = await fetch(`${API_BASE}/api/orders/mine`, {
-          headers: getAuthHeaders()
-        });
-        if (!response.ok) throw new Error('Failed to fetch tickets');
-        const orders = await response.json();
-        setMyTickets(orders);
-      } catch (error) {
-        console.error('Error fetching tickets:', error);
+        const [ordersRes, waitlistRes] = await Promise.all([
+          fetch(`${API_BASE}/api/orders/mine`, { headers: getAuthHeaders() }),
+          fetch(`${API_BASE}/api/waitlist/mine`, { headers: getAuthHeaders() })
+        ]);
+        if (ordersRes.ok) setOrders(await ordersRes.json());
+        if (waitlistRes.ok) setWaitlist(await waitlistRes.json());
+      } catch (err) {
+        console.error('Failed to fetch data:', err);
       } finally {
         setLoading(false);
       }
     }
-    fetchMyTickets();
+    fetchData();
   }, [currentUser]);
+
+  const handleListForResale = async (ticketId) => {
+    if (!resalePrice || isNaN(resalePrice) || Number(resalePrice) <= 0) {
+      alert('Please enter a valid price');
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE}/api/resale/${ticketId}/list`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ resalePrice })
+      });
+      if (response.ok) {
+        alert('Ticket listed for resale!');
+        const updated = await response.json();
+        setOrders(orders.map(o => o._id === ticketId || o.id === ticketId ? updated : o));
+        setSelectedOrder(updated);
+        setResalePrice('');
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to list ticket');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Server error');
+    }
+  };
+
+  const handleUnlist = async (ticketId) => {
+    try {
+      const response = await fetch(`${API_BASE}/api/resale/${ticketId}/unlist`, {
+        method: 'PUT',
+        headers: getAuthHeaders()
+      });
+      if (response.ok) {
+        alert('Ticket removed from resale!');
+        const updated = await response.json();
+        setOrders(orders.map(o => o._id === ticketId || o.id === ticketId ? updated : o));
+        setSelectedOrder(updated);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const now = new Date();
 
   // Split tickets into upcoming vs past based on eventDate
-  const upcomingTickets = myTickets.filter(order => {
+  const upcomingTickets = orders.filter(order => {
     if (!order.eventDate) return true;
-    // eventDate format: "Jun 17, 2026 • 8:00 PM" — parse ISO part if available
     const datePart = order.eventDate.split('•')[0].trim();
     return new Date(datePart) >= now;
   });
 
-  const pastTickets = myTickets.filter(order => {
+  const pastTickets = orders.filter(order => {
     if (!order.eventDate) return false;
     const datePart = order.eventDate.split('•')[0].trim();
     return new Date(datePart) < now;
@@ -149,8 +195,7 @@ function Dashboard() {
       </div>
 
       <div className="ticket-actions">
-        <button className="btn-secondary">Transfer</button>
-        <button className="btn-secondary">Sell</button>
+        <button className="btn-secondary" onClick={() => setSelectedOrder(order)}>Manage Ticket</button>
       </div>
     </div>
   );
@@ -312,6 +357,94 @@ function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Waitlist Section */}
+      {waitlist.length > 0 && activeTab === 'upcoming' && (
+        <div className="dashboard-content" style={{ marginTop: '2rem' }}>
+          <h2 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Bell size={24} className="text-accent" /> Your Waitlists
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+            {waitlist.map(entry => (
+              <div key={entry._id} className="settings-card glass-panel" style={{ borderLeft: '4px solid var(--accent)' }}>
+                <h3 style={{ margin: '0 0 0.5rem' }}>{entry.eventTitle}</h3>
+                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Clock size={14} /> Joined {new Date(entry.createdAt).toLocaleDateString()}
+                </div>
+                <p style={{ margin: 0, fontSize: '0.9rem' }}>
+                  You are position <strong>#{entry.position}</strong> in line. We'll email you if tickets become available!
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Ticket Modal */}
+      {selectedOrder && (
+        <div className="modal-overlay" onClick={() => setSelectedOrder(null)}>
+          <div className="modal-content ticket-modal glass-panel" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Manage Ticket</h2>
+              <button className="close-btn" onClick={() => setSelectedOrder(null)}><X size={20} /></button>
+            </div>
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="ticket-card" style={{ cursor: 'default', transform: 'none' }}>
+                <div className="ticket-main">
+                  <h3>{selectedOrder.eventTitle}</h3>
+                  <div className="ticket-meta">
+                    <div className="ticket-meta-item">
+                      <Calendar size={16} className="text-accent" />
+                      <span>{selectedOrder.eventDate}</span>
+                    </div>
+                    <div className="ticket-meta-item">
+                      <MapPin size={16} className="text-accent" />
+                      <span>{selectedOrder.eventVenue}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="seat-info">
+                  <div className="seat-box">
+                    <span className="seat-label">SEC</span>
+                    <span className="seat-value">{selectedOrder.section?.name?.split(' ')[0] || 'GA'}</span>
+                  </div>
+                  <div className="seat-box">
+                    <span className="seat-label">TICKETS</span>
+                    <span className="seat-value">{selectedOrder.ticketCount}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="resale-section" style={{ padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <h3 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Tag size={18} className="text-accent" /> Resell Ticket
+                </h3>
+                {selectedOrder.isListed ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div>
+                      <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Listed for <strong className="text-accent">${selectedOrder.resalePrice}</strong></p>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Ticket is currently available in the Marketplace.</p>
+                    </div>
+                    <button className="btn-secondary" onClick={() => handleUnlist(selectedOrder.id || selectedOrder._id)}>Cancel Listing</button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input 
+                      type="number" 
+                      placeholder="Price ($)" 
+                      value={resalePrice} 
+                      onChange={(e) => setResalePrice(e.target.value)}
+                      style={{ background: 'var(--bg-primary)', border: '1px solid var(--border)', color: 'white', padding: '0.75rem', borderRadius: '8px', width: '100px' }}
+                    />
+                    <button className="btn-primary" onClick={() => handleListForResale(selectedOrder.id || selectedOrder._id)}>List for Resale</button>
+                  </div>
+                )}
+                {selectedOrder.checkedIn && <p style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.5rem' }}>Cannot resell a checked-in ticket.</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

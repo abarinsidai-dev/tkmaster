@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useEvents } from '../context/EventContext';
-import { Plus, Edit2, Check, X, Camera, CalendarDays } from 'lucide-react';
+import { Plus, Edit2, Check, X, Camera, CalendarDays, BarChart3 } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { useAuth } from '../context/AuthContext';
+import AnalyticsCharts from '../components/AnalyticsCharts';
 import './AdminDashboard.css';
 
 function AdminDashboard() {
@@ -114,6 +115,12 @@ function AdminDashboard() {
           onClick={() => setActiveTab('scanner')}
         >
           <Camera size={18} /> Scan Tickets
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analytics')}
+        >
+          <BarChart3 size={18} /> Analytics
         </button>
       </div>
 
@@ -255,6 +262,15 @@ function AdminDashboard() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {activeTab === 'analytics' && (
+        <div className="admin-section glass-panel">
+          <div className="section-header">
+            <h2>Analytics Dashboard</h2>
+          </div>
+          <AnalyticsCharts />
         </div>
       )}
     </div>

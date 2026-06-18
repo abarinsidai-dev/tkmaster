@@ -9,6 +9,8 @@ const authRoutes   = require('./routes/auth');
 const eventRoutes  = require('./routes/events');
 const orderRoutes  = require('./routes/orders');
 const aiRoutes     = require('./routes/ai');
+const waitlistRoutes = require('./routes/waitlist');
+const resaleRoutes = require('./routes/resale');
 
 const app = express();
 const server = http.createServer(app);
@@ -85,10 +87,12 @@ io.on('connection', (socket) => {
 app.use(express.json());
 
 // ── Routes ────────────────────────────────────────────────
-app.use('/api/auth',   authRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/orders', orderRoutes);
+app.use('/api/auth',      authRoutes);
+app.use('/api/events',    eventRoutes);
+app.use('/api/orders',    orderRoutes);
 app.use('/api/recommend', aiRoutes);
+app.use('/api/waitlist',  waitlistRoutes);
+app.use('/api/resale',    resaleRoutes);
 
 // ── Health check ──────────────────────────────────────────
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));

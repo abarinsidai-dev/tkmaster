@@ -2,20 +2,24 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Info, Plus, Minus, Check, ShieldCheck, Star, ChevronRight } from 'lucide-react';
 import { useEvents } from '../context/EventContext';
+import { useAuth } from '../context/AuthContext';
 import EventCard from '../components/EventCard';
 import InteractiveMap from '../components/InteractiveMap';
 import VenueMap from '../components/VenueMap';
+import ShareCard from '../components/ShareCard';
 import './EventDetails.css';
 
 function EventDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { events: globalEvents } = useEvents();
+  const { currentUser, getAuthHeaders } = useAuth();
   const [event, setEvent] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [ticketCount, setTicketCount] = useState(2);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [waitlistStatus, setWaitlistStatus] = useState('');
 
   useEffect(() => {
     const found = globalEvents.find(e => e.id === id);
@@ -23,6 +27,32 @@ function EventDetails() {
   }, [id, globalEvents]);
 
   if (!event) return <div className="loading-state">Loading event details...</div>;
+
+  const isSoldOut = event.price > 500;
+
+  const handleJoinWaitlist = async () => {
+    if (!currentUser) {
+      alert('Please sign in to join the waitlist.');
+      return;
+    }
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${API_BASE}/api/waitlist/${event.id}`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ eventTitle: event.title })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setWaitlistStatus('Joined!');
+        alert(`You've been added! You are position #${data.position} in line.`);
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      alert('Failed to join waitlist');
+    }
+  };
 
   const mockSections = [
     { id: 'sec1', name: 'VIP Soundcheck (Green)', price: 489.50, color: '#22c55e' },
@@ -44,11 +74,9 @@ function EventDetails() {
 
   const handleSeatToggle = (seatData, isSelecting) => {
     if (!seatData) {
-      // Force clear all (e.g. socket disconnected or lock failed)
       setSelectedSeats([]);
       return;
     }
-
     if (isSelecting) {
       setSelectedSeats(prev => [...prev, seatData]);
     } else {
@@ -77,7 +105,6 @@ function EventDetails() {
 
   return (
     <div className="event-details-page animate-fade-in">
-      {/* Event Header */}
       <div className="event-hero" style={{ backgroundImage: `linear-gradient(to right, rgba(10,10,11,1) 30%, rgba(10,10,11,0.4)), url(${event.image})` }}>
         <div className="container event-hero-content">
           <div className="event-badges">
@@ -95,12 +122,12 @@ function EventDetails() {
               <MapPin size={20} className="meta-icon" />
               <span>{event.venue}</span>
             </div>
+            <ShareCard event={event} />
           </div>
         </div>
       </div>
 
       <div className="container event-main-content">
-        {/* Seat Map */}
         <div className="seat-map-container glass-panel">
           <div className="seat-map-header">
             <h3>Interactive Seat Map</h3>
@@ -111,24 +138,18 @@ function EventDetails() {
           
           <div className="extracted-stadium-wrapper">
             <div className="stadium-map-css">
-              {/* Economy (Red) */}
               <div className={`section-shape red-left ${selectedSection?.id === 'sec5' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[4])}></div>
               <div className={`section-shape red-right ${selectedSection?.id === 'sec5' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[4])}></div>
-              {/* Value (Blue) */}
               <div className={`section-shape blue-left ${selectedSection?.id === 'sec4' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[3])}></div>
               <div className={`section-shape blue-right ${selectedSection?.id === 'sec4' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[3])}></div>
-              {/* Standard (Orange) */}
               <div className={`section-shape orange-top ${selectedSection?.id === 'sec3' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[2])}></div>
-              {/* Premium (Purple) */}
               <div className={`section-shape purple-bowl ${selectedSection?.id === 'sec2' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[1])}></div>
-              {/* VIP Soundcheck (Green) */}
               <div className={`section-shape green-floor ${selectedSection?.id === 'sec1' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[0])}>
                 <div className="stage-cross-shape">STAGE</div>
               </div>
             </div>
           </div>
 
-          {/* Individual Seat Picker — shown when a section is selected */}
           {selectedSection && (
             <div className="seat-selector-panel">
               <div className="seat-selector-panel-header">
@@ -146,30 +167,8 @@ function EventDetails() {
           )}
         </div>
 
-        {/* Ticket Selection Sidebar */}
         <div className="ticket-selection-sidebar glass-panel">
           <h3>Buy Tickets</h3>
-          
-          <div className="ticket-counter">
-            <label>Number of Tickets</label>
-            <div className="counter-controls">
-              <button 
-                className="counter-btn" 
-                onClick={() => setTicketCount(Math.max(1, ticketCount - 1))}
-                disabled={ticketCount <= 1}
-              >
-                <Minus size={16} />
-              </button>
-              <span className="count-display">{ticketCount}</span>
-              <button 
-                className="counter-btn" 
-                onClick={() => setTicketCount(Math.min(8, ticketCount + 1))}
-                disabled={ticketCount >= 8}
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-          </div>
 
           <div className="sections-list">
             <h4>Available Sections</h4>
@@ -208,13 +207,25 @@ function EventDetails() {
                 <span className="total-price">${((selectedSection?.price || event.price) * ticketCount).toFixed(2)}</span>
               </div>
             )}
-            <button 
-              className={`btn-primary checkout-btn ${isCheckingOut ? 'loading' : ''}`}
-              onClick={handleCheckout}
-              disabled={!selectedSection && selectedSeats.length === 0}
-            >
-              {isCheckingOut ? 'Processing...' : 'Go to Checkout'}
-            </button>
+            
+            {isSoldOut ? (
+              <button 
+                className={`btn-primary full-width ${waitlistStatus ? 'btn-success' : ''}`}
+                style={{ padding: '1rem', fontSize: '1.1rem', background: waitlistStatus ? 'var(--success)' : 'var(--error)' }}
+                onClick={handleJoinWaitlist}
+                disabled={waitlistStatus !== ''}
+              >
+                {waitlistStatus ? '✓ On Waitlist' : 'Sold Out — Join Waitlist'}
+              </button>
+            ) : (
+              <button 
+                className={`btn-primary checkout-btn ${isCheckingOut ? 'loading' : ''}`}
+                onClick={handleCheckout}
+                disabled={!selectedSection && selectedSeats.length === 0}
+              >
+                {isCheckingOut ? 'Processing...' : 'Go to Checkout'}
+              </button>
+            )}
           </div>
         </div>
       </div>

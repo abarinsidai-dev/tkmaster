@@ -7,6 +7,7 @@ import EventDetails from './pages/EventDetails';
 import Checkout from './pages/Checkout';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import Marketplace from './pages/Marketplace';
 import FomoNotification from './components/FomoNotification';
 import { EventProvider } from './context/EventContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -37,7 +38,8 @@ function AppRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/event/:id" element={<EventDetails />} />
-          <Route path="/checkout" element={
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/checkout/:id" element={
             <ProtectedRoute>
               <Checkout />
             </ProtectedRoute>
