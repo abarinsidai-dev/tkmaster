@@ -18,13 +18,28 @@ function AuthModal({ onClose }) {
     setLoading(true);
     try {
       if (mode === 'signup') {
-        await signup(email, password);
+        await signup(email, password, name);
       } else {
         await login(email, password);
       }
       onClose();
     } catch (err) {
-      setError(err.message.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim());
+      let errorMessage = "An error occurred. Please try again.";
+      if (err.code === 'auth/email-already-in-use') {
+        errorMessage = "An account with this email already exists.";
+      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        errorMessage = "Invalid email or password.";
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = "Password should be at least 6 characters.";
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = "Please enter a valid email address.";
+      } else if (err.message) {
+        // Fallback for unexpected errors
+        errorMessage = err.message.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim();
+        if (errorMessage === 'Error') errorMessage = "Something went wrong. Please try again.";
+      }
+      
+      setError(errorMessage);
     }
     setLoading(false);
   };
