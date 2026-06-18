@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
+const Waitlist = require('../models/Waitlist');
 const authMiddleware = require('../middleware/auth');
+const { sendWaitlistAlert } = require('../utils/email');
 
 // @route   GET /api/resale
 // @desc    Get all tickets listed for resale
@@ -53,6 +55,18 @@ router.put('/:id/unlist', authMiddleware, async (req, res) => {
     order.isListed = false;
     order.resalePrice = null;
     const updated = await order.save();
+
+    // Notify the first person on the waitlist for this event
+    try {
+      const waitlistEntry = await Waitlist.findOne({ eventId: order.eventId }).sort({ createdAt: 1 });
+      if (waitlistEntry && waitlistEntry.userEmail) {
+        const marketplaceUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/marketplace`;
+        sendWaitlistAlert(waitlistEntry.userEmail, order.eventTitle, marketplaceUrl);
+      }
+    } catch (wErr) {
+      console.error('Waitlist alert error (non-fatal):', wErr);
+    }
+
     res.json(updated);
   } catch (err) {
     console.error('Unlist resale error:', err);

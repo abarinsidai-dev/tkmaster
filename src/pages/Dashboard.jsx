@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Ticket, Calendar, MapPin, Clock, User, Bell, CreditCard, LogOut, CheckCircle, Download, Tag, X } from 'lucide-react';
+import { Ticket, Calendar, MapPin, Clock, User, Bell, CreditCard, LogOut, CheckCircle, Download, Tag, X, Send } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../context/AuthContext';
+import TransferModal from '../components/TransferModal';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -13,6 +14,7 @@ function Dashboard() {
   const [waitlist, setWaitlist] = useState([]);
   const [activeTab, setActiveTab] = useState('upcoming');
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showTransfer, setShowTransfer] = useState(false);
   const [resalePrice, setResalePrice] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -448,9 +450,39 @@ function Dashboard() {
                 )}
                 {selectedOrder.checkedIn && <p style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.5rem' }}>Cannot resell a checked-in ticket.</p>}
               </div>
+
+              <div className="transfer-section" style={{ padding: '1.5rem', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                <h3 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Send size={18} className="text-accent" /> Transfer Ticket
+                </h3>
+                <p style={{ margin: '0 0 1rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                  Send this ticket to a friend's email address instantly.
+                </p>
+                <button 
+                  className="btn-primary" 
+                  onClick={() => setShowTransfer(true)}
+                  disabled={selectedOrder.isListed || selectedOrder.checkedIn}
+                >
+                  Transfer Ticket
+                </button>
+                {selectedOrder.isListed && <p style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.5rem' }}>Cannot transfer a listed ticket. Unlist it first.</p>}
+                {selectedOrder.checkedIn && <p style={{ color: 'var(--error)', fontSize: '0.8rem', marginTop: '0.5rem' }}>Cannot transfer a checked-in ticket.</p>}
+              </div>
             </div>
           </div>
         </div>
+      )}
+
+      {showTransfer && selectedOrder && (
+        <TransferModal
+          order={selectedOrder}
+          onClose={() => setShowTransfer(false)}
+          onTransferred={(transferredId) => {
+            setOrders(orders.filter(o => o.id !== transferredId && o._id !== transferredId));
+            setSelectedOrder(null);
+            setShowTransfer(false);
+          }}
+        />
       )}
     </motion.div>
   );

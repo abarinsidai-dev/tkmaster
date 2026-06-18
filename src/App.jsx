@@ -10,9 +10,11 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Marketplace from './pages/Marketplace';
 import FomoNotification from './components/FomoNotification';
+import InstallPrompt from './components/InstallPrompt';
 import { EventProvider } from './context/EventContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+
 
 // Admin email — only this account can access /admin
 const ADMIN_EMAIL = 'admin@tickt.com';
@@ -60,6 +62,7 @@ function AppRoutes() {
           </Routes>
         </AnimatePresence>
         <FomoNotification />
+        <InstallPrompt />
       </main>
       <Footer />
     </div>

@@ -1,0 +1,16 @@
+{
+  "short_name": "tickt",
+  "name": "tickt - Smart Event Ticketing",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0a0a0b",
+  "theme_color": "#8b5cf6",
+  "display": "standalone",
+  "orientation": "portrait"
+}

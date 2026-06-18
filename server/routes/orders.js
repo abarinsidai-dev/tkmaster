@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
+const User = require('../models/User');
 const authMiddleware = require('../middleware/auth');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
-const { sendReceiptEmail } = require('../utils/email');
+const { sendReceiptEmail, sendTransferEmail } = require('../utils/email');
 
 // @route   GET /api/orders/mine
 // @desc    Get orders for the logged in user
@@ -93,6 +94,42 @@ router.put('/:id/checkin', authMiddleware, async (req, res) => {
     res.json(updatedOrder);
   } catch (err) {
     console.error('Checkin error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// @route   POST /api/orders/:id/transfer
+// @desc    Transfer a ticket to another user by email
+// @access  Private
+router.post('/:id/transfer', authMiddleware, async (req, res) => {
+  try {
+    const { recipientEmail } = req.body;
+    if (!recipientEmail) return res.status(400).json({ error: 'Recipient email is required.' });
+    if (recipientEmail.toLowerCase() === req.user.email.toLowerCase()) {
+      return res.status(400).json({ error: 'You cannot transfer a ticket to yourself.' });
+    }
+
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ error: 'Ticket not found.' });
+    if (order.userId !== req.user.id) return res.status(403).json({ error: 'You do not own this ticket.' });
+    if (order.checkedIn) return res.status(400).json({ error: 'Cannot transfer a checked-in ticket.' });
+    if (order.isListed) return res.status(400).json({ error: 'Unlist from resale before transferring.' });
+
+    // Find the recipient
+    const recipient = await User.findOne({ email: recipientEmail.toLowerCase() });
+    if (!recipient) return res.status(404).json({ error: 'No tickt account found for that email address.' });
+
+    // Transfer ownership
+    order.userId = recipient._id.toString();
+    order.purchaseDate = new Date();
+    await order.save();
+
+    // Send confirmation emails to both parties asynchronously
+    sendTransferEmail(req.user.email, recipientEmail, order.eventTitle);
+
+    res.json({ message: `Ticket successfully transferred to ${recipientEmail}.` });
+  } catch (err) {
+    console.error('Transfer error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
