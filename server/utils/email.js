@@ -1,34 +1,47 @@
 const nodemailer = require('nodemailer');
 
-// Reuse a test account if already created to avoid hitting rate limits
 let transporter = null;
+const FROM_EMAIL = process.env.FROM_EMAIL || '"tickt Team" <noreply@tickt.com>';
 
-async function setupEthereal() {
+async function setupTransporter() {
   if (!transporter) {
-    // Generate a test account on Ethereal (fake email service for testing)
-    const testAccount = await nodemailer.createTestAccount();
-    
-    transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: testAccount.user, // generated ethereal user
-        pass: testAccount.pass, // generated ethereal password
-      },
-    });
-    console.log('📧 Ethereal Email initialized. Check server logs after purchases for preview links.');
+    if (process.env.SENDGRID_API_KEY) {
+      transporter = nodemailer.createTransport({
+        host: 'smtp.sendgrid.net',
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: 'apikey',
+          pass: process.env.SENDGRID_API_KEY,
+        },
+      });
+      console.log('📧 SendGrid SMTP Email transport initialized.');
+    } else {
+      // Generate a test account on Ethereal (fake email service for testing)
+      const testAccount = await nodemailer.createTestAccount();
+      
+      transporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: testAccount.user, // generated ethereal user
+          pass: testAccount.pass, // generated ethereal password
+        },
+      });
+      console.log('📧 Ethereal Email initialized. Check server logs after purchases for preview links.');
+    }
   }
   return transporter;
 }
 
 async function sendReceiptEmail(order, userEmail) {
   try {
-    const t = await setupEthereal();
+    const t = await setupTransporter();
 
     // Setup email data
     const mailOptions = {
-      from: '"tickt Team" <noreply@tickt.com>', 
+      from: FROM_EMAIL, 
       to: userEmail,
       subject: `Your Tickets: ${order.eventTitle}`,
       html: `
@@ -55,8 +68,10 @@ async function sendReceiptEmail(order, userEmail) {
     const info = await t.sendMail(mailOptions);
 
     console.log('----------------------------------------');
-    console.log('✉️  Receipt email "sent" via Ethereal!');
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    console.log('✉️  Receipt email sent!');
+    if (!process.env.SENDGRID_API_KEY) {
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    }
     console.log('----------------------------------------');
 
   } catch (error) {
@@ -66,9 +81,9 @@ async function sendReceiptEmail(order, userEmail) {
 
 async function sendWaitlistAlert(email, eventTitle, marketplaceUrl) {
   try {
-    const t = await setupEthereal();
+    const t = await setupTransporter();
     const info = await t.sendMail({
-      from: '"tickt Team" <noreply@tickt.com>',
+      from: FROM_EMAIL,
       to: email,
       subject: `🎟️ Ticket Available: ${eventTitle}`,
       html: `
@@ -84,7 +99,10 @@ async function sendWaitlistAlert(email, eventTitle, marketplaceUrl) {
         </div>
       `,
     });
-    console.log('✉️  Waitlist alert sent! Preview:', nodemailer.getTestMessageUrl(info));
+    console.log('✉️  Waitlist alert sent!');
+    if (!process.env.SENDGRID_API_KEY) {
+      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+    }
   } catch (error) {
     console.error('Failed to send waitlist alert:', error);
   }
@@ -92,10 +110,10 @@ async function sendWaitlistAlert(email, eventTitle, marketplaceUrl) {
 
 async function sendTransferEmail(fromEmail, toEmail, eventTitle) {
   try {
-    const t = await setupEthereal();
+    const t = await setupTransporter();
     // Notify recipient
     const infoTo = await t.sendMail({
-      from: '"tickt Team" <noreply@tickt.com>',
+      from: FROM_EMAIL,
       to: toEmail,
       subject: `🎟️ You've received a ticket: ${eventTitle}`,
       html: `
@@ -111,7 +129,7 @@ async function sendTransferEmail(fromEmail, toEmail, eventTitle) {
     });
     // Notify sender
     const infoFrom = await t.sendMail({
-      from: '"tickt Team" <noreply@tickt.com>',
+      from: FROM_EMAIL,
       to: fromEmail,
       subject: `✅ Ticket Transfer Confirmed: ${eventTitle}`,
       html: `
@@ -125,8 +143,10 @@ async function sendTransferEmail(fromEmail, toEmail, eventTitle) {
       `,
     });
     console.log('✉️  Transfer emails sent!');
-    console.log('Recipient preview:', nodemailer.getTestMessageUrl(infoTo));
-    console.log('Sender preview:', nodemailer.getTestMessageUrl(infoFrom));
+    if (!process.env.SENDGRID_API_KEY) {
+      console.log('Recipient preview:', nodemailer.getTestMessageUrl(infoTo));
+      console.log('Sender preview:', nodemailer.getTestMessageUrl(infoFrom));
+    }
   } catch (error) {
     console.error('Failed to send transfer email:', error);
   }
