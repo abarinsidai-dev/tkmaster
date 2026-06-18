@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Lock, AlertCircle, CheckCircle2, Ticket, Clock } from 'lucide-react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useAuth } from '../context/AuthContext';
 import './Checkout.css';
 
 function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { event, tickets, section } = location.state || {};
+  const { event, tickets, section, seats } = location.state || {};
+  const { currentUser } = useAuth();
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -51,15 +55,38 @@ function Checkout() {
   const orderProcessingFee = 2.95;
   const total = subtotal + serviceFee + orderProcessingFee;
 
-  const handlePayment = (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
     
-    // Simulate payment processing
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Save order to Firestore
+      const orderData = {
+        userId: currentUser.uid,
+        eventId: event.id,
+        eventTitle: event.title,
+        eventDate: event.date,
+        eventVenue: event.venue,
+        eventImage: event.image,
+        section: section,
+        seats: seats || [],
+        ticketCount: tickets,
+        totalPaid: total,
+        purchaseDate: new Date().toISOString()
+      };
+      
+      await addDoc(collection(db, 'orders'), orderData);
+      
       setIsSuccess(true);
-    }, 2000);
+    } catch (error) {
+      console.error("Error processing order: ", error);
+      alert("There was an error processing your order. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (isSuccess) {

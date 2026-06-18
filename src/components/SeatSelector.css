@@ -1,0 +1,121 @@
+.seat-selector {
+  padding: 1.5rem 0;
+}
+
+.seat-selector-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.stage-label {
+  background: linear-gradient(90deg, transparent, var(--bg-tertiary), transparent);
+  color: var(--text-secondary);
+  font-weight: 700;
+  letter-spacing: 0.2rem;
+  font-size: 0.8rem;
+  padding: 0.5rem 3rem;
+  border-radius: var(--radius-md);
+}
+
+.seat-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.seat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.row-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  width: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.seats-in-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
+.seat-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px 5px 2px 2px;
+  border: none;
+  background-color: var(--seat-color, var(--accent-primary));
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.seat-btn:hover:not(:disabled) {
+  opacity: 1;
+  transform: scale(1.15) translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.seat-btn.selected {
+  background-color: #f59e0b !important;
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+.seat-btn.unavailable {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* Legend */
+.seat-legend {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.legend-dot.available {
+  background-color: var(--seat-color, var(--accent-primary));
+  opacity: 0.85;
+}
+
+.legend-dot.selected {
+  background-color: #f59e0b;
+}
+
+.legend-dot.unavailable-dot {
+  background-color: var(--bg-tertiary);
+  opacity: 0.4;
+}

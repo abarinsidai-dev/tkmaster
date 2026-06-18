@@ -105,6 +105,14 @@
   background-color: var(--bg-secondary);
 }
 
+.navbar-signin-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .mobile-menu-btn {
   display: none;
 }

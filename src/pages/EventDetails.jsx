@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Info, Plus, Minus, Check, ShieldCheck, Star, ChevronRight } from 'lucide-react';
 import { useEvents } from '../context/EventContext';
 import EventCard from '../components/EventCard';
+import SeatSelector from '../components/SeatSelector';
 import './EventDetails.css';
 
 function EventDetails() {
@@ -11,6 +12,7 @@ function EventDetails() {
   const { events: globalEvents } = useEvents();
   const [event, setEvent] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null);
+  const [selectedSeats, setSelectedSeats] = useState([]);
   const [ticketCount, setTicketCount] = useState(2);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
@@ -22,12 +24,27 @@ function EventDetails() {
   if (!event) return <div className="loading-state">Loading event details...</div>;
 
   const mockSections = [
-    { id: 'sec1', name: 'VIP Soundcheck (Green)', price: 489.50, color: '#22c55e' }, // Green: $309.75 - $669.37
-    { id: 'sec2', name: 'Premium (Purple)', price: 379.25, color: '#a855f7' }, // Purple: $258.77 - $499.75
-    { id: 'sec3', name: 'Standard (Orange)', price: 229.66, color: '#f97316' }, // Orange: $229.66
-    { id: 'sec4', name: 'Value (Blue)', price: 228.75, color: '#3b82f6' }, // Blue: $207.80 - $249.70
-    { id: 'sec5', name: 'Economy (Red)', price: 193.25, color: '#ef4444' } // Red: $156.82 - $229.66
+    { id: 'sec1', name: 'VIP Soundcheck (Green)', price: 489.50, color: '#22c55e' },
+    { id: 'sec2', name: 'Premium (Purple)', price: 379.25, color: '#a855f7' },
+    { id: 'sec3', name: 'Standard (Orange)', price: 229.66, color: '#f97316' },
+    { id: 'sec4', name: 'Value (Blue)', price: 228.75, color: '#3b82f6' },
+    { id: 'sec5', name: 'Economy (Red)', price: 193.25, color: '#ef4444' }
   ];
+
+  const handleSectionClick = (section) => {
+    if (selectedSection?.id === section.id) {
+      setSelectedSection(null);
+      setSelectedSeats([]);
+    } else {
+      setSelectedSection(section);
+      setSelectedSeats([]);
+    }
+  };
+
+  const seatTotal = selectedSeats.reduce((sum, s) => sum + s.price, 0);
+  const totalPrice = selectedSeats.length > 0 
+    ? seatTotal 
+    : (selectedSection?.price || event?.price || 0) * ticketCount;
 
   const handleCheckout = () => {
     setIsCheckingOut(true);
@@ -35,8 +52,9 @@ function EventDetails() {
       navigate('/checkout', { 
         state: { 
           event, 
-          tickets: ticketCount, 
-          section: selectedSection || mockSections[3] 
+          tickets: selectedSeats.length > 0 ? selectedSeats.length : ticketCount, 
+          section: selectedSection || mockSections[3],
+          seats: selectedSeats
         } 
       });
     }, 800);
@@ -79,46 +97,37 @@ function EventDetails() {
           <div className="extracted-stadium-wrapper">
             <div className="stadium-map-css">
               {/* Economy (Red) */}
-              <div 
-                className={`section-shape red-left ${selectedSection?.id === 'sec5' ? 'active' : ''}`}
-                onClick={() => setSelectedSection(mockSections[4])}
-              ></div>
-              <div 
-                className={`section-shape red-right ${selectedSection?.id === 'sec5' ? 'active' : ''}`}
-                onClick={() => setSelectedSection(mockSections[4])}
-              ></div>
-              
+              <div className={`section-shape red-left ${selectedSection?.id === 'sec5' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[4])}></div>
+              <div className={`section-shape red-right ${selectedSection?.id === 'sec5' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[4])}></div>
               {/* Value (Blue) */}
-              <div 
-                className={`section-shape blue-left ${selectedSection?.id === 'sec4' ? 'active' : ''}`}
-                onClick={() => setSelectedSection(mockSections[3])}
-              ></div>
-              <div 
-                className={`section-shape blue-right ${selectedSection?.id === 'sec4' ? 'active' : ''}`}
-                onClick={() => setSelectedSection(mockSections[3])}
-              ></div>
-
+              <div className={`section-shape blue-left ${selectedSection?.id === 'sec4' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[3])}></div>
+              <div className={`section-shape blue-right ${selectedSection?.id === 'sec4' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[3])}></div>
               {/* Standard (Orange) */}
-              <div 
-                className={`section-shape orange-top ${selectedSection?.id === 'sec3' ? 'active' : ''}`}
-                onClick={() => setSelectedSection(mockSections[2])}
-              ></div>
-              
+              <div className={`section-shape orange-top ${selectedSection?.id === 'sec3' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[2])}></div>
               {/* Premium (Purple) */}
-              <div 
-                className={`section-shape purple-bowl ${selectedSection?.id === 'sec2' ? 'active' : ''}`}
-                onClick={() => setSelectedSection(mockSections[1])}
-              ></div>
-
+              <div className={`section-shape purple-bowl ${selectedSection?.id === 'sec2' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[1])}></div>
               {/* VIP Soundcheck (Green) */}
-              <div 
-                className={`section-shape green-floor ${selectedSection?.id === 'sec1' ? 'active' : ''}`}
-                onClick={() => setSelectedSection(mockSections[0])}
-              >
+              <div className={`section-shape green-floor ${selectedSection?.id === 'sec1' ? 'active' : ''}`} onClick={() => handleSectionClick(mockSections[0])}>
                 <div className="stage-cross-shape">STAGE</div>
               </div>
             </div>
           </div>
+
+          {/* Individual Seat Picker — shown when a section is selected */}
+          {selectedSection && (
+            <div className="seat-selector-panel">
+              <div className="seat-selector-panel-header">
+                <div className="seat-panel-indicator" style={{ backgroundColor: selectedSection.color }}></div>
+                <h4>{selectedSection.name}</h4>
+                <span className="seat-panel-count">{selectedSeats.length} seat{selectedSeats.length !== 1 ? 's' : ''} selected</span>
+              </div>
+              <SeatSelector
+                section={selectedSection}
+                selectedSeats={selectedSeats}
+                onSeatSelect={setSelectedSeats}
+              />
+            </div>
+          )}
         </div>
 
         {/* Ticket Selection Sidebar */}
@@ -165,15 +174,28 @@ function EventDetails() {
           </div>
 
           <div className="checkout-summary">
-            <div className="summary-row">
-              <span>Total ({ticketCount} tickets)</span>
-              <span className="total-price">
-                ${((selectedSection?.price || event.price) * ticketCount).toFixed(2)}
-              </span>
-            </div>
+            {selectedSeats.length > 0 ? (
+              <>
+                <div className="summary-row">
+                  <span>{selectedSeats.length} seat{selectedSeats.length !== 1 ? 's' : ''} selected</span>
+                  <span className="total-price">${seatTotal.toFixed(2)}</span>
+                </div>
+                <div className="selected-seats-list">
+                  {selectedSeats.map(s => (
+                    <span key={s.id} className="seat-tag">Row {s.row} · #{s.number}</span>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="summary-row">
+                <span>Total ({ticketCount} tickets)</span>
+                <span className="total-price">${((selectedSection?.price || event.price) * ticketCount).toFixed(2)}</span>
+              </div>
+            )}
             <button 
               className={`btn-primary checkout-btn ${isCheckingOut ? 'loading' : ''}`}
               onClick={handleCheckout}
+              disabled={!selectedSection && selectedSeats.length === 0}
             >
               {isCheckingOut ? 'Processing...' : 'Go to Checkout'}
             </button>
