@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, User, Menu, Ticket, Moon, Sun, LogOut, LogIn, X, Settings, Home, Music, Trophy, Palette } from 'lucide-react';
+import { Search, User, Menu, Moon, Sun, LogOut, LogIn, X, Settings, Home, Music, Trophy, Palette } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from './AuthModal';
@@ -40,7 +40,7 @@ function Navbar() {
       <nav className="navbar">
         <div className="navbar-container container">
           <Link to="/" className="navbar-brand" onClick={closeMobile}>
-            <Ticket className="brand-icon" size={28} />
+            <img src="/logo.svg" alt="Ticketmaster" className="brand-logo" />
             <span className="brand-text">Ticketmaster</span>
           </Link>
 
@@ -108,7 +108,7 @@ function Navbar() {
       <div className={`mobile-drawer ${mobileOpen ? 'open' : ''}`}>
         <div className="mobile-drawer-header">
           <Link to="/" className="navbar-brand" onClick={closeMobile}>
-            <Ticket className="brand-icon" size={24} />
+            <img src="/logo.svg" alt="Ticketmaster" className="brand-logo" />
             <span className="brand-text">Ticketmaster</span>
           </Link>
           <button className="btn-icon" onClick={closeMobile} aria-label="Close menu">

@@ -50,9 +50,9 @@ function AuthModal({ onClose }) {
         <button className="modal-close" onClick={onClose}><X size={20} /></button>
 
         <div className="auth-modal-header">
-          <span className="logo-icon-modal">t</span>
+          <img src="/logo.svg" alt="Ticketmaster" className="logo-icon-modal" style={{ width: 48, height: 48, borderRadius: 12 }} />
           <h2>{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
-          <p>{mode === 'login' ? 'Sign in to access your tickets' : 'Join tickt to start buying tickets'}</p>
+          <p>{mode === 'login' ? 'Sign in to access your tickets' : 'Join Ticketmaster to start buying tickets'}</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>

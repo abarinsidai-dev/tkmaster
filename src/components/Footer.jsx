@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Ticket, Globe, MessageCircle, Camera, Play } from 'lucide-react';
+import { Globe, MessageCircle, Camera, Play } from 'lucide-react';
 import './Footer.css';
 
 function Footer() {
@@ -8,7 +8,7 @@ function Footer() {
       <div className="container footer-content">
         <div className="footer-brand">
           <Link to="/" className="footer-logo">
-            <Ticket className="brand-icon" size={24} />
+            <img src="/logo.svg" alt="Ticketmaster" className="brand-logo" style={{ width: 32, height: 32 }} />
             <span>Ticketmaster</span>
           </Link>
           <p className="footer-description">
@@ -47,7 +47,7 @@ function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <p>&copy; {new Date().getFullYear()} Ticketmaster Clone. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Ticketmaster. All rights reserved.</p>
       </div>
     </footer>
   );

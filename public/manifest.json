@@ -1,9 +1,9 @@
 {
-  "short_name": "tickt",
-  "name": "tickt - Smart Event Ticketing",
+  "short_name": "Ticketmaster",
+  "name": "Ticketmaster - Smart Event Ticketing",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/logo.svg",
       "type": "image/svg+xml",
       "sizes": "any"
     }
